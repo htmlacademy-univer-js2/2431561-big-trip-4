@@ -36,6 +36,18 @@ const Price = {
   MIN: 1,
   MAX: 1000
 };
+const TIME_PERIODS = {
+  MSEC_IN_SEC: 1000,
+  SEC_IN_MIN: 60,
+  MIN_IN_HOUR: 60,
+  HOUR_IN_DAY: 24,
+  get MSEC_IN_HOUR() {
+    return this.MSEC_IN_SEC * this.SEC_IN_MIN * this.MIN_IN_HOUR;
+  },
+  get MSEC_IN_DAY() {
+    return this.MSEC_IN_HOUR * this.HOUR_IN_DAY;
+  },
+};
 
 export {
   OFFER_COUNT,
@@ -47,5 +59,6 @@ export {
   Price,
   TYPES_OF_TRIP,
   DEFAULT_TYPE,
-  POINT_EMPTY
+  POINT_EMPTY,
+  TIME_PERIODS
 };

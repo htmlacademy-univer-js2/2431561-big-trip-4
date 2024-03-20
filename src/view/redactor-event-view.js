@@ -2,20 +2,22 @@ import { createElement } from '../render';
 import { POINT_EMPTY, TYPES_OF_TRIP, CITIES } from '../const';
 import { capitalize, humanizeDateTime } from '../util';
 
-const createPointTypesTemplate = (currentType) => TYPES_OF_TRIP.map((type) => `<div class="event__type-item">
-          <input id="event-type-${type}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" ${currentType === type ? 'checked' : ''}>
-          <label class="event__type-label  event__type-label--${type}" for="event-type-${type}-1">${type}</label>
-      </div>`).join('');
+const createPointTypesTemplate = (currentType) => TYPES_OF_TRIP.reduce((accumulator, type)=>
+  `${accumulator}<div class="event__type-item">
+     <input id="event-type-${type}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" ${currentType === type ? 'checked' : ''}>
+     <label class="event__type-label  event__type-label--${type}" for="event-type-${type}-1">${capitalize(type)}</label>
+   </div>`, ''
+);
 
 const createCitiesTemplate = () => (
   `<datalist id="destination-list-1">
-        ${CITIES.map((city) => `<option value="${city}"></option>`).join('')}
-    </div>`
+        ${CITIES.reduce((accumulator, city) => `${accumulator}<option value="${city}"></option>`, '')}
+    </datalist>`
 );
 
 const createOffersTemplate = ({pointOffers}) => {
-  const offerItems = pointOffers.map((offer) => (
-    `<div class="event__offer-selector">
+  const offerItems = pointOffers.reduce((accumulator, offer) => (
+    `${accumulator}<div class="event__offer-selector">
               <input class="event__offer-checkbox  visually-hidden" id="${offer.id}" type="checkbox" name="event-offer-luggage" checked>
               <label class="event__offer-label" for="${offer.id}">
                   <span class="event__offer-title">${offer.title}</span>
@@ -23,16 +25,17 @@ const createOffersTemplate = ({pointOffers}) => {
                   <span class="event__offer-price">${offer.price}</span>
               </label>
           </div>`
-  )).join('');
+  ), '');
 
   return `<div class="event__available-offers">${offerItems}</div>`;
 };
 
 const createPhotosTemplate = (pointDestination) => (
   `<div class="event__photos-tape">
-          ${pointDestination.illustrations.map((picture) =>
-    `<img class="event__photo" src="${picture.src}" alt="${picture.description}">`).join('')}
-      </div>`
+  ${pointDestination.illustrations.reduce((accumulator, picture) => (
+    `${accumulator}<img class="event__photo" src="${picture.src}" alt="${picture.description}">`
+  ), '')}
+  </div>`
 );
 
 const createRedactorEventTemplate = ({point, pointDestination, pointOffers}) => {

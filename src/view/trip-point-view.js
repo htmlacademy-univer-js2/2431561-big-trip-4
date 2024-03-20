@@ -2,13 +2,13 @@ import { createElement } from '../render';
 import { humanizeDateTime, humanizeShortDate, humanizeTime, getPointDuration } from '../util';
 
 const createPointOffersTemplate = ({pointOffers}) => {
-  const offerItems = pointOffers.map((offer) => (
-    `<li class="event__offer">
+  const offerItems = pointOffers.reduce((accumulator, offer) => (
+    `${accumulator}<li class="event__offer">
     <span class="event__offer-title">${offer.title}</span>
     &plus;&euro;&nbsp;
     <span class="event__offer-price">${offer.price}</span>
-</li>`
-  )).join('');
+    </li>`
+  ), '');
 
   return `<ul class="event__selected-offers">${offerItems}</ul>`;
 };
