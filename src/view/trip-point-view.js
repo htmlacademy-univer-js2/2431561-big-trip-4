@@ -1,4 +1,4 @@
-import { createElement } from '../render';
+import AbstractView from '../framework/view/abstract-view';
 import { humanizeDateTime, humanizeShortDate, humanizeTime, getPointDuration } from '../util';
 
 const createPointOffersTemplate = ({pointOffers}) => {
@@ -49,30 +49,32 @@ const createTripPointTemplate = ({point, pointDestination, pointOffers}) => {
 </li>`);
 };
 
-export default class TripPointView{
-  constructor({point, pointDestination, pointOffers}){
-    this.point = point;
-    this.pointDestination = pointDestination;
-    this.pointOffers = pointOffers;
+export default class TripPointView extends AbstractView{
+  #point = null;
+  #pointDestination = null;
+  #pointOffers = null;
+  #handleRedactorClick = null;
+
+  constructor({point, pointDestination, pointOffers, onRedactorClick}){
+    super();
+    this.#point = point;
+    this.#pointDestination = pointDestination;
+    this.#pointOffers = pointOffers;
+    this.#handleRedactorClick = onRedactorClick;
+
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#redactorClickHandler);
   }
 
-  getTemplate(){
+  get template(){
     return createTripPointTemplate({
-      point: this.point,
-      pointDestination: this.pointDestination,
-      pointOffers: this.pointOffers
+      point: this.#point,
+      pointDestination: this.#pointDestination,
+      pointOffers: this.#pointOffers
     });
   }
 
-  getElement(){
-    if(!this.element){
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement(){
-    this.element = null;
-  }
+  #redactorClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleRedactorClick();
+  };
 }
