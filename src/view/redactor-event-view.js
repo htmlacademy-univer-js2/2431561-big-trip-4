@@ -1,4 +1,4 @@
-import { createElement } from '../render';
+import AbstractView from '../framework/view/abstract-view';
 import { POINT_EMPTY, TYPES_OF_TRIP, CITIES } from '../const';
 import { capitalize, humanizeDateTime } from '../util';
 
@@ -106,26 +106,36 @@ const createRedactorEventTemplate = ({point, pointDestination, pointOffers}) => 
   </li>`);
 };
 
-export default class RedactorEventView{
-  constructor({point = POINT_EMPTY, pointDestination, pointOffers}){
-    this.point = point;
-    this.pointDestination = pointDestination;
-    this.pointOffers = pointOffers;
+export default class RedactorEventView extends AbstractView{
+  #point = null;
+  #pointDestination = null;
+  #pointOffers = null;
+  #handleRedactorSubmit = null;
+  #handleRedactorReset = null;
+
+  constructor({point = POINT_EMPTY, pointDestination, pointOffers, onFormSubmit, onResetClick}){
+    super();
+    this.#point = point;
+    this.#pointDestination = pointDestination;
+    this.#pointOffers = pointOffers;
+    this.#handleRedactorSubmit = onFormSubmit;
+    this.#handleRedactorReset = onResetClick;
+
+    this.element.querySelector('form').addEventListener('submit', this.#redactorSubmitHandler);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#redactorResetHandler);
   }
 
-  getTemplate(){
-    return createRedactorEventTemplate({point: this.point, pointDestination: this.pointDestination, pointOffers: this.pointOffers });
+  get template(){
+    return createRedactorEventTemplate({point: this.#point, pointDestination: this.#pointDestination, pointOffers: this.#pointOffers });
   }
 
-  getElement(){
-    if(!this.element){
-      this.element = createElement(this.getTemplate());
-    }
+  #redactorSubmitHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleRedactorSubmit();
+  };
 
-    return this.element;
-  }
-
-  removeElement(){
-    this.element = null;
-  }
+  #redactorResetHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleRedactorReset();
+  };
 }
