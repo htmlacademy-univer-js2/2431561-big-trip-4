@@ -1,4 +1,4 @@
-import { generateDescription, getRandomArrayElement, getRandomNumber } from '../util';
+import { generateDescription, getRandomArrayElement, getRandomNumber } from '../utils/common';
 import { CITIES, DESCRIPTION } from '../const';
 
 function generateDestination(){

@@ -1,5 +1,5 @@
 import { OFFERS } from '../const';
-import { getRandomArrayElement, getRandomNumber } from '../util';
+import { getRandomArrayElement, getRandomNumber } from '../utils/common';
 
 function generateOffer(){
   return {

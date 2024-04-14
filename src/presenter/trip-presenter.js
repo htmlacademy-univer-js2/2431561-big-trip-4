@@ -2,6 +2,7 @@ import SortView from '../view/sort-view';
 import RedactorEventView from '../view/redactor-event-view';
 import TripPointView from '../view/trip-point-view';
 import TripEventsView from '../view/trip-events-view';
+import EmptyListView from '../view/empty-list-view';
 import { render, replace } from '../framework/render';
 
 export default class TripPresenter{
@@ -9,6 +10,7 @@ export default class TripPresenter{
   #pointList = null;
   #destinationsModel = null;
   #offersModel = null;
+  #pointsModel = null;
   #points = [];
 
   constructor({tripContainer, destinationsModel, offersModel, pointsModel }){
@@ -16,16 +18,21 @@ export default class TripPresenter{
     this.#pointList = new TripEventsView();
     this.#destinationsModel = destinationsModel;
     this.#offersModel = offersModel;
+    this.#pointsModel = pointsModel;
     this.#points = [...pointsModel.get()];
   }
 
   init(){
+    if(this.#points.length === 0){
+      render(new EmptyListView(), this.#tripContainer);
+      return;
+    }
+
     render(new SortView(), this.#tripContainer);
     render(this.#pointList, this.#tripContainer);
     this.#points.forEach((point) => {
       this.#renderPoint(point);
     });
-
   }
 
   #renderPoint(point){

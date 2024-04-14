@@ -48,6 +48,12 @@ const TIME_PERIODS = {
     return this.MSEC_IN_HOUR * this.HOUR_IN_DAY;
   },
 };
+const FILTER_TYPE = {
+  EVERYTHING: 'everything',
+  FUTURE: 'future',
+  PRESENT: 'present',
+  PAST: 'past'
+};
 
 export {
   OFFER_COUNT,
@@ -60,5 +66,6 @@ export {
   TYPES_OF_TRIP,
   DEFAULT_TYPE,
   POINT_EMPTY,
-  TIME_PERIODS
+  TIME_PERIODS,
+  FILTER_TYPE
 };
