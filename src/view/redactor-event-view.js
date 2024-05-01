@@ -1,6 +1,7 @@
 import AbstractView from '../framework/view/abstract-view';
 import { POINT_EMPTY, TYPES_OF_TRIP, CITIES } from '../const';
-import { capitalize, humanizeDateTime } from '../util';
+import { capitalize } from '../utils/common';
+import { humanizeDateTime } from '../utils/point';
 
 const createPointTypesTemplate = (currentType) => TYPES_OF_TRIP.reduce((accumulator, type)=>
   `${accumulator}<div class="event__type-item">

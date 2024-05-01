@@ -1,27 +1,13 @@
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { TIME_PERIODS } from './const';
+import { TIME_PERIODS } from '../const';
+import {getRandomNumber} from './common';
 
 dayjs.extend(duration);
 dayjs.extend(relativeTime);
 
 let date = dayjs().subtract(getRandomNumber(0, 5), 'day').toDate();
-
-function getRandomNumber(min, max) {
-  const leftBorder = Math.ceil(Math.min(Math.abs(min), Math.abs(max)));
-  const rightBorder = Math.floor(Math.max(Math.abs(min), Math.abs(max)));
-  const randomNumber = Math.random() * (rightBorder - leftBorder + 1) + leftBorder;
-  return Math.floor(randomNumber);
-}
-
-function getRandomArrayElement(items) {
-  return items[getRandomNumber(0, items.length - 1)];
-}
-
-function capitalize(string){
-  return `${string[0].toUpperCase()}${string.slice(1)}`;
-}
 
 function humanizeDateTime(dateInfo) {
   return dateInfo ? dayjs(dateInfo).format('YYYY-MM-DDTHH:mm') : '';
@@ -68,15 +54,17 @@ function getDate({next}){
   return date;
 }
 
-function generateDescription(items){
-  const sentencesCount = getRandomNumber(1, 5);
-  let description = '';
-  for(let i = 0; i < sentencesCount; i ++){
-    description = `${description} ${getRandomArrayElement(items) }`;
-  }
-
-  return description;
+function isPointFuture(point) {
+  return dayjs().isBefore(point.dateFrom);
 }
 
-export {getRandomNumber, getRandomArrayElement, capitalize, humanizeDateTime,
-  humanizeShortDate, humanizeTime, getPointDuration, getScheduleDate, getDate, generateDescription};
+function isPointPresent(point) {
+  return (dayjs().isAfter(point.dateFrom) && dayjs().isBefore(point.dateTo));
+}
+
+function isPointPast(point) {
+  return dayjs().isAfter(point.dateTo);
+}
+
+export {humanizeDateTime, humanizeShortDate, humanizeTime, getPointDuration, getScheduleDate, getDate,
+  isPointFuture, isPointPresent, isPointPast};

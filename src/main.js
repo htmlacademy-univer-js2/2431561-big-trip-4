@@ -1,11 +1,11 @@
-import { render, RenderPosition } from './framework/render';
 import DestinationView from './view/destination-view';
-import FilterView from './view/filter-view';
 import TripPresenter from './presenter/trip-presenter';
+import FilterPresenter from './presenter/filter-presenter';
 import MockService from './service/mock-service';
 import DestinationsModel from './model/destinations-model';
 import OffersModel from './model/offers-model';
 import PointsModel from './model/points-model';
+import { render, RenderPosition } from './framework/render';
 
 const siteDestinationContainer = document.querySelector('.trip-main');
 const siteFilterContainer = document.querySelector('.trip-controls__filters');
@@ -22,8 +22,9 @@ const tripPresenter = new TripPresenter({
   offersModel,
   pointsModel
 });
+const filterPresenter = new FilterPresenter({container: siteFilterContainer, pointsModel});
 
 render(new DestinationView(), siteDestinationContainer, RenderPosition.AFTERBEGIN);
-render(new FilterView(), siteFilterContainer);
 
 tripPresenter.init();
+filterPresenter.init();

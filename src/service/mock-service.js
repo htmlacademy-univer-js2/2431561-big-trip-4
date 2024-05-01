@@ -2,7 +2,7 @@ import { TYPES_OF_TRIP, DESTINATION_COUNT, OFFER_COUNT, POINT_COUNT } from '../c
 import { generateDestination } from '../mock/destination';
 import { generateOffer } from '../mock/offer';
 import { generatePoint } from '../mock/tripPoint';
-import { getRandomNumber, getRandomArrayElement } from '../util';
+import { getRandomNumber, getRandomArrayElement } from '../utils/common';
 
 export default class MockService{
   #destinations = [];

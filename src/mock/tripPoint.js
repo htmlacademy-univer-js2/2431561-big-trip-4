@@ -1,4 +1,5 @@
-import { getDate, getRandomNumber } from '../util';
+import { getRandomNumber } from '../utils/common';
+import { getDate } from '../utils/point';
 
 function generatePoint(type, destinationId, offerIds){
   return {
