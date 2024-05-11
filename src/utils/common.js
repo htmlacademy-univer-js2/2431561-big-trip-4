@@ -28,4 +28,8 @@ function getLastWord(string) {
   return wordsList.at(-1);
 }
 
-export {getRandomNumber,getRandomArrayElement,capitalize,generateDescription,getLastWord};
+function updateItem(items, update) {
+  return items.map((item) => item.id === update.id ? update : item);
+}
+
+export {getRandomNumber,getRandomArrayElement,capitalize,generateDescription,getLastWord, updateItem};

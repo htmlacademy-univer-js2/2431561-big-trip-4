@@ -54,6 +54,17 @@ const FILTER_TYPE = {
   PRESENT: 'present',
   PAST: 'past'
 };
+const MODE = {
+  DEFAULT: 'default',
+  EDITING: 'egiting',
+};
+const SORT_TYPE = {
+  DAY: 'day',
+  EVENT: 'event',
+  TIME: 'time',
+  PRICE: 'price',
+  OFFERS: 'offers',
+};
 
 export {
   OFFER_COUNT,
@@ -67,5 +78,7 @@ export {
   DEFAULT_TYPE,
   POINT_EMPTY,
   TIME_PERIODS,
-  FILTER_TYPE
+  FILTER_TYPE,
+  MODE,
+  SORT_TYPE,
 };
