@@ -66,5 +66,10 @@ function isPointPast(point) {
   return dayjs().isAfter(point.dateTo);
 }
 
+function getDuration(dateTo, dateFrom){
+  const minuteDifference = dayjs(dateTo).diff(dayjs(dateFrom), 'minute');
+  return dayjs.duration(minuteDifference);
+}
+
 export {humanizeDateTime, humanizeShortDate, humanizeTime, getPointDuration, getScheduleDate, getDate,
-  isPointFuture, isPointPresent, isPointPast};
+  isPointFuture, isPointPresent, isPointPast, getDuration};
