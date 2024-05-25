@@ -37,8 +37,8 @@ export default class TripPointPresenter{
     );
     this.#redactorComponent = new RedactorEventView({
       point: this.#point,
-      pointDestination: this.#destinationsModel.getById(point.destination),
-      pointOffers: this.#offersModel.getByType(point.type),
+      pointDestination: this.#destinationsModel.get(),
+      pointOffers: this.#offersModel.get(),
       onFormSubmit: this.#pointSubmitHandler,
       onResetClick: this.#resetButtonClickHandler,
     });
@@ -60,6 +60,7 @@ export default class TripPointPresenter{
 
   resetView() {
     if (this.#mode === MODE.EDITING) {
+      this.#redactorComponent.reset(this.#point);
       this.#switchToPoint();
     }
   }
@@ -85,6 +86,7 @@ export default class TripPointPresenter{
   #onEscape = (evt) => {
     if(evt.key === 'Escape'){
       evt.preventDefault();
+      this.#pointComponent.reset(this.#point);
       this.#switchToPoint();
     }
   };
@@ -100,11 +102,13 @@ export default class TripPointPresenter{
     this.#switchToRedactor();
   };
 
-  #pointSubmitHandler = () => {
+  #pointSubmitHandler = (newPoint) => {
+    this.#point = newPoint;
     this.#switchToPoint();
   };
 
   #resetButtonClickHandler = () => {
+    this.#redactorComponent.reset(this.#point);
     this.#switchToPoint();
   };
 
