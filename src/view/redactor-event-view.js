@@ -2,6 +2,8 @@ import AbstractStatefulView from '../framework/view/abstract-stateful-view';
 import { POINT_EMPTY, TYPES_OF_TRIP, CITIES } from '../const';
 import { capitalize, getLastWord } from '../utils/common';
 import { humanizeDateTime } from '../utils/point';
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
 
 const createPointTypesTemplate = (currentType) => TYPES_OF_TRIP.reduce((accumulator, type)=>
   `${accumulator}<div class="event__type-item">
@@ -19,7 +21,7 @@ const createCitiesTemplate = () => (
 const createOffersTemplate = ({currentOffers, selectedOffers}) => {
   const offerItems = currentOffers.reduce((accumulator, offer) => (
     `${accumulator}<div class="event__offer-selector">
-              <input class="event__offer-checkbox  visually-hidden" id="${offer.id}" type="checkbox" name="event-offer-${getLastWord(offer.title)}" ${selectedOffers.some((id) => id === offer.id) ? 'checked' : ''}>
+              <input class="event__offer-checkbox  visually-hidden" id="${offer.id}" type="checkbox" name="event-offer-${getLastWord(offer.title)}" data-offer-id="${offer.id}" ${selectedOffers.some((id) => id === offer.id) ? 'checked' : ''}>
               <label class="event__offer-label" for="${offer.id}">
                   <span class="event__offer-title">${offer.title}</span>
                   &plus;&euro;&nbsp;
@@ -114,6 +116,8 @@ export default class RedactorEventView extends AbstractStatefulView{
   #pointOffers = null;
   #handleRedactorSubmit = null;
   #handleRedactorReset = null;
+  #datepickeFrom = null;
+  #datepickerTo = null;
 
   constructor({point = POINT_EMPTY, pointDestination, pointOffers, onFormSubmit, onResetClick}){
     super();
@@ -140,6 +144,8 @@ export default class RedactorEventView extends AbstractStatefulView{
     this.element.querySelector('.event__available-offers').addEventListener('change', this.#offerChangeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationChangeHandler);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#typeChangeHandler);
+
+    this.#setDatePickers();
   };
 
   #redactorSubmitHandler = (evt) => {
@@ -164,12 +170,11 @@ export default class RedactorEventView extends AbstractStatefulView{
   };
 
   #offerChangeHandler = () => {
-    const selectedOffers = Array.from(this.element.querySelectorAll('.event__offer-checkbox:checked'))
-      .map(({id}) => id.split('-').slice(3).join('-'));
+    const selectedOffers = Array.from(this.element.querySelectorAll('.event__offer-checkbox:checked'));
     this._setState({
       point: {
         ...this._state.point,
-        offers: selectedOffers
+        offers: selectedOffers.map((element) => element.dataset.offerId),
       }
     });
   };
@@ -184,6 +189,60 @@ export default class RedactorEventView extends AbstractStatefulView{
     });
   };
 
+  #datepickerFromChangeHandler = ([userDate]) => {
+    this._setState({
+      point: {
+        ...this._state.point,
+        dateFrom: userDate,
+      }
+    });
+    this.#datepickeFrom.set('maxDate', this._state.point.dateTo);
+  };
+
+  #datepickerToChangeHandler = ([userDate]) => {
+    this._setState({
+      point: {
+        ...this._state.point,
+        dateTo: userDate,
+      }
+    });
+    this.#datepickerTo.set('minDate', this._state.point.dateFrom);
+  };
+
+  #setDatePickers = () => {
+    const [dateFromElement, dateToElement] = this.element.querySelectorAll('.event__input--time');
+
+    this.#datepickeFrom = flatpickr(
+      dateFromElement,
+      {
+        dateFormat: 'd/m/y H:i',
+        enableTime: true,
+        locale: {
+          firstDayOfWeek: 1,
+        },
+        'time_24hr': true,
+        defaultDate: this._state.point.dateFrom,
+        maxDate: this._state.point.dateTo,
+        onChange: this.#datepickerFromChangeHandler,
+      },
+    );
+
+    this.#datepickerTo = flatpickr(
+      dateToElement,
+      {
+        dateFormat: 'd/m/y H:i',
+        enableTime: true,
+        locale: {
+          firstDayOfWeek: 1,
+        },
+        'time_24hr': true,
+        defaultDate: this._state.point.dateTo,
+        minDate: this._state.point.dateFrom,
+        onChange: this.#datepickerToChangeHandler,
+      },
+    );
+  };
+
   static parsePointToState({point}){
     return {point};
   }
@@ -191,4 +250,17 @@ export default class RedactorEventView extends AbstractStatefulView{
   static parseStateToPoint(state){
     return state.point;
   }
+
+  removeElement = () => {
+    super.removeElement();
+    if(this.#datepickeFrom){
+      this.#datepickeFrom.destroy();
+      this.#datepickeFrom = null;
+    }
+
+    if(this.#datepickerTo){
+      this.#datepickerTo.destroy();
+      this.#datepickerTo = null;
+    }
+  };
 }
