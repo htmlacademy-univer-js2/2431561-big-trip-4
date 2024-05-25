@@ -28,13 +28,13 @@ export default class MockService{
   }
 
   generateDestinations(){
-    return Array.from({length: DESTINATION_COUNT}, () => generateDestination());
+    return Array.from({length: DESTINATION_COUNT}, generateDestination);
   }
 
   generateOffers(){
     return TYPES_OF_TRIP.map((type) => ({
       type,
-      offers: Array.from({length: getRandomNumber(0, OFFER_COUNT)}, () => generateOffer(type))
+      offers: Array.from({length: getRandomNumber(0, OFFER_COUNT)}, generateOffer)
     }));
   }
 
