@@ -103,7 +103,7 @@ export default class TripPointPresenter{
   };
 
   #pointSubmitHandler = (newPoint) => {
-    this.#point = newPoint;
+    this.#handleDataChange(newPoint);
     this.#switchToPoint();
   };
 
