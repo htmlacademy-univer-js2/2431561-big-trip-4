@@ -1,5 +1,5 @@
 import { replace, render, remove } from '../framework/render';
-import { MODE } from '../const';
+import { MODE, UserAction, UpdateType, EditType } from '../const';
 import TripPointView from '../view/trip-point-view';
 import RedactorEventView from '../view/redactor-event-view';
 
@@ -39,8 +39,10 @@ export default class TripPointPresenter{
       point: this.#point,
       pointDestination: this.#destinationsModel.get(),
       pointOffers: this.#offersModel.get(),
-      onFormSubmit: this.#pointSubmitHandler,
-      onResetClick: this.#resetButtonClickHandler,
+      onFormClose: this.#redactorCloseHandler,
+      onFormSubmit: this.#redactorSubmitHandler,
+      onFormDelete: this.#redactorDeleteHandler,
+      pointType: EditType.EDITING,
     });
 
     if(!prevPointComponent || !prevRedactorComponent){
@@ -92,24 +94,30 @@ export default class TripPointPresenter{
   };
 
   #onFavoriteClick = () => {
-    this.#handleDataChange({
-      ...this.#point,
-      isFavorite: !this.#point.isFavorite,
-    });
+    this.#handleDataChange(
+      UserAction.UPDATE_POINT,
+      UpdateType.PATCH,{
+        ...this.#point,
+        isFavorite: !this.#point.isFavorite,
+      });
   };
 
   #pointRedactorClickHandler = () => {
     this.#switchToRedactor();
   };
 
-  #pointSubmitHandler = (newPoint) => {
-    this.#handleDataChange(newPoint);
+  #redactorSubmitHandler = (newPoint) => {
+    this.#handleDataChange(UserAction.UPDATE_POINT, UpdateType.MINOR, newPoint);
     this.#switchToPoint();
   };
 
-  #resetButtonClickHandler = () => {
+  #redactorCloseHandler = () => {
     this.#redactorComponent.reset(this.#point);
     this.#switchToPoint();
+  };
+
+  #redactorDeleteHandler = (point) => {
+    this.#handleDataChange(UserAction.DELETE_POINT, UpdateType.MINOR, point);
   };
 
 }
