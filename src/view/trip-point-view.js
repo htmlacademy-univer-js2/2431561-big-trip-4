@@ -1,5 +1,6 @@
 import AbstractView from '../framework/view/abstract-view';
 import { humanizeDateTime, humanizeShortDate, humanizeTime, getPointDuration } from '../utils/point';
+import he from 'he';
 
 const createPointOffersTemplate = ({currentOffers, selectedOffers}) => {
   const offerItems = currentOffers.filter((offer) => selectedOffers.includes(offer.id)).reduce((accumulator, offer) => (
@@ -23,7 +24,7 @@ const createTripPointTemplate = ({point, pointDestination, pointOffers}) => {
     <div class="event__type">
       <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
     </div>
-    <h3 class="event__title">${type} ${pointDestination.name}</h3>
+    <h3 class="event__title">${he.encode(type)} ${he.encode(pointDestination.name)}</h3>
     <div class="event__schedule">
     <p class="event__time">
       <time class="event__start-time" datetime="${humanizeDateTime(dateFrom)}">${humanizeTime(dateFrom)}</time>
@@ -33,7 +34,7 @@ const createTripPointTemplate = ({point, pointDestination, pointOffers}) => {
     <p class="event__duration">${getPointDuration(dateFrom, dateTo)}</p>
   </div>
     <p class="event__price">
-      &euro;&nbsp;<span class="event__price-value">${basePrice}</span>
+      &euro;&nbsp;<span class="event__price-value">${he.encode(String(basePrice))}</span>
     </p>
     <h4 class="visually-hidden">Offers:</h4>
     ${createPointOffersTemplate({currentOffers, selectedOffers})}

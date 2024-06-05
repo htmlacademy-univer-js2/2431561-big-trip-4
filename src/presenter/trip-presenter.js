@@ -1,9 +1,10 @@
 import SortView from '../view/sort-view';
 import TripEventsView from '../view/trip-events-view';
 import EmptyListView from '../view/empty-list-view';
+import LoadingView from '../view/loading-view';
 import TripPointPresenter from './trip-point-presenter';
 import NewPointPresenter from './new-point-presenter';
-import { remove, render, replace } from '../framework/render';
+import { remove, render, replace, RenderPosition } from '../framework/render';
 import { SORT_TYPE, UserAction, UpdateType, EnabledSortType, FILTER_TYPE } from '../const';
 import { filter } from '../utils/filter';
 import {sortTime, sortPrice} from '../utils/sort';
@@ -20,8 +21,11 @@ export default class TripPresenter{
   #newPointButtonPresenter = null;
   #sortComponent = null;
   #messageComponent = null;
+  #loadingComponent = new LoadingView();
   #currentSortType = SORT_TYPE.DAY;
   #isCreating = false;
+  #isLoading = true;
+  #isErrorLoading = false;
 
   constructor({tripContainer, destinationsModel, offersModel, pointsModel, filterModel, newPointButton }){
     this.#tripContainer = tripContainer;
@@ -79,6 +83,14 @@ export default class TripPresenter{
   };
 
   #renderTrip(){
+    if(this.#isLoading){
+      this.#renderLoading();
+    }
+    if(this.#isErrorLoading){
+      this.#clearTrip({resetSortType: true});
+      return;
+    }
+
     if(this.points.length === 0 && !this.#isCreating){
       this.#renderMessage();
       return;
@@ -90,6 +102,10 @@ export default class TripPresenter{
 
   #renderPointList(){
     render(this.#pointList, this.#tripContainer);
+  }
+
+  #renderLoading(){
+    render(this.#loadingComponent, this.#tripContainer, RenderPosition.AFTERBEGIN);
   }
 
   #renderPoints(){
@@ -182,12 +198,22 @@ export default class TripPresenter{
         this.#clearTrip({ resetSortType: true });
         this.#renderTrip();
         break;
+      case UpdateType.INIT:
+        if(data.isError){
+          this.#isErrorLoading = true;
+        }else{
+          this.#isLoading = false;
+          remove(this.#loadingComponent);
+        }
+        this.#renderTrip();
+        break;
     }
   };
 
   #clearTrip = ({resetSortType = false} = {}) => {
     this.#clearPoints();
     remove(this.#messageComponent);
+    remove(this.#loadingComponent);
     remove(this.#sortComponent);
     this.#sortComponent = null;
 
