@@ -4,7 +4,6 @@ export default class DestinationsModel{
 
   constructor(service){
     this.#service = service;
-    this.#destinations = this.#service.destinations;
   }
 
   get(){
@@ -13,5 +12,10 @@ export default class DestinationsModel{
 
   getById(id){
     return this.#destinations.find((destination) => destination.id === id);
+  }
+
+  async init(){
+    this.#destinations = await this.#service.destionations;
+    return this.#destinations;
   }
 }

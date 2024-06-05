@@ -83,6 +83,7 @@ const UpdateType = {
   PATCH: 'PATCH',
   MINOR: 'MINOR',
   MAJOR: 'MAJOR',
+  INIT: 'INIT',
 };
 const EditType = {
   EDITING: 'EDITING',
@@ -98,6 +99,10 @@ const ButtonLabel = {
   CANCEL: 'Cancel',
   DELETE: 'Delete',
   SAVE: 'Save'
+};
+const Method = {
+  GET: 'GET',
+  PUT: 'PUT',
 };
 
 export {
@@ -121,4 +126,5 @@ export {
   EditType,
   FilterMessage,
   ButtonLabel,
+  Method,
 };

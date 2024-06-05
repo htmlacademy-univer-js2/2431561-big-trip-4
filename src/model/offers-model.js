@@ -4,7 +4,6 @@ export default class OffersModel{
 
   constructor(service){
     this.#service = service;
-    this.#offers = this.#service.offers;
   }
 
   get(){
@@ -13,5 +12,10 @@ export default class OffersModel{
 
   getByType(type){
     return this.#offers.find((offer) => offer.type === type);
+  }
+
+  async init(){
+    this.#offers = await this.#service.offers;
+    return this.#offers;
   }
 }
