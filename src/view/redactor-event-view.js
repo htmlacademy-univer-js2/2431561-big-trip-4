@@ -6,15 +6,15 @@ import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 import he from 'he';
 
-const createPointTypesTemplate = (currentType) => TYPES_OF_TRIP.reduce((accumulator, type)=>
+const createPointTypesTemplate = ({currentType, isDisabled}) => TYPES_OF_TRIP.reduce((accumulator, type)=>
   `${accumulator}<div class="event__type-item">
-     <input id="event-type-${type}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" ${currentType === type ? 'checked' : ''}>
+     <input id="event-type-${type}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" ${currentType === type ? 'checked' : ''} ${(isDisabled) ? 'disabled' : ''}>
      <label class="event__type-label  event__type-label--${type}" for="event-type-${type}-1">${capitalize(type)}</label>
    </div>`, ''
 );
 
-const createCitiesTemplate = () => (
-  `<datalist id="destination-list-1">
+const createCitiesTemplate = ({isDisabled}) => (
+  `<datalist id="destination-list-1" ${isDisabled ? 'disabled' : ''}>
         ${CITIES.reduce((accumulator, city) => `${accumulator}<option value="${city}"></option>`, '')}
     </datalist>`
 );
@@ -35,58 +35,61 @@ const createOffersTemplate = ({currentOffers, selectedOffers}) => {
 
 const createPhotosTemplate = ({currentDestination}) => (
   `<div class="event__photos-tape">
-  ${currentDestination.illustrations.reduce((accumulator, picture) => (
-    `${accumulator}<img class="event__photo" src="${picture.src}" alt="${picture.description}">`
-  ), '')}
+  ${(currentDestination.illustrations.length) ? currentDestination.illustrations.reduce((accumulator, picture) => (`${accumulator}<img class="event__photo" src="${picture.src}" alt="${picture.description}">`), '') : ''}
   </div>`
 );
 
-const createOffersSectionTemplate = ({ currentOffers, selectedOffers }) => `
-  <section class="event__section  event__section--offers">
-    <h3 class="event__section-title  event__section-title--offers">Offers</h3>
-    <div class="event__available-offers">
-      ${createOffersTemplate({ currentOffers, selectedOffers })}
-    </div>
-  </section>
-`;
+// const createOffersSectionTemplate = ({ currentOffers, selectedOffers }) => `
+//   <section class="event__section  event__section--offers">
+//     <h3 class="event__section-title  event__section-title--offers">Offers</h3>
+//     <div class="event__available-offers">
+//       ${createOffersTemplate({ currentOffers, selectedOffers })}
+//     </div>
+//   </section>
+// `;
 
-const createDestinationSectionTemplate = ({ currentDestination }) => {
-  if (!currentDestination.illustrations.length && !currentDestination.description.length) {
-    return '';
+// const createDestinationSectionTemplate = ({ currentDestination }) => {
+//   if (!currentDestination.illustrations.length && !currentDestination.description.length) {
+//     return '';
+//   }
+//   return `
+//     <section class="event__section  event__section--destination">
+//       <h3 class="event__section-title  event__section-title--destination">Destination</h3>
+//       ${currentDestination.description.length
+//     ? `<p class="event__destination-description">
+//         ${currentDestination.description}
+//       </p>` : ''}
+//       ${currentDestination.illustrations.length
+//     ? `<div class="event__photos-container">
+//         ${createPhotosTemplate({ currentDestination })}
+//       </div>` : ''}
+//     </section>`;
+// };
+
+const createPointEditButtonsTemplate = ({pointType, isDisabled, isSaving, isDeleting}) => {
+  const isEditing = pointType === EditType.EDITING;
+  const saveLabel = isSaving ? ButtonLabel.SAVING : ButtonLabel.SAVE;
+  let resetLabel;
+  if(isEditing){
+    resetLabel = isDeleting ? ButtonLabel.DELETING : ButtonLabel.DELETE;
+  }else{
+    resetLabel = ButtonLabel.CANCEL;
   }
   return `
-    <section class="event__section  event__section--destination">
-      <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-      ${currentDestination.description.length
-    ? `<p class="event__destination-description">
-        ${currentDestination.description}
-      </p>` : ''}
-      ${currentDestination.illustrations.length
-    ? `<div class="event__photos-container">
-        ${createPhotosTemplate({ currentDestination })}
-      </div>` : ''}
-    </section>`;
-};
-
-const createPointEditButtonsTemplate = ({pointType}) => {
-  const isEditing = pointType === EditType.EDITING;
-  const saveLabel = ButtonLabel.SAVE;
-  const resetLabel = isEditing ? ButtonLabel.DELETE : ButtonLabel.CANCEL;
-
-  return `
-    <button class="event__save-btn  btn  btn--blue" type="submit">${saveLabel}</button>
-    <button class="event__reset-btn" type="reset">${resetLabel}</button>
+    <button class="event__save-btn  btn  btn--blue" type="submit" ${(isDisabled) ? 'disabled' : ''}>${saveLabel}</button>
+    <button class="event__reset-btn" type="reset" ${(isDisabled) ? 'disabled' : ''}>${resetLabel}</button>
     ${isEditing ? `
-      <button class="event__rollup-btn" type="button">
+      <button class="event__rollup-btn" type="button" ${(isDisabled) ? 'disabled' : ''}>
         <span class="visually-hidden">Open event</span>
       </button>`
     : ''}
   `;
 };
 
-const createRedactorEventTemplate = ({point, pointDestination, pointOffers, pointType}) => {
+const createRedactorEventTemplate = ({state, pointDestination, pointOffers, pointType}) => {
+  const {point, isDisabled, isSaving, isDeleting} = state;
   const { basePrice, dateFrom, dateTo, offers: selectedOffers, type } = point;
-  const currentOffers = pointOffers.find((offer) => offer.type === type)?.offers;
+  const currentOffers = pointOffers.find((offer) => offer.type === type).offers;
   const currentDestination = pointDestination.find((destination) => destination.id === point.destination);
   return (`<li class="trip-events__item">
   <form class="event event--edit" action="#" method="post">
@@ -96,12 +99,12 @@ const createRedactorEventTemplate = ({point, pointDestination, pointOffers, poin
           <span class="visually-hidden">Choose event type</span>
           <img class="event__type-icon" width="17" height="17" src="img/icons/${type}.png" alt="Event type icon">
         </label>
-        <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
+        <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox" ${isDisabled ? 'disabled' : ''}>
 
         <div class="event__type-list">
           <fieldset class="event__type-group">
             <legend class="visually-hidden">Event type</legend>
-            ${createPointTypesTemplate(type)}
+            ${createPointTypesTemplate({type, isDisabled})}
           </fieldset>
         </div>
       </div>
@@ -110,16 +113,23 @@ const createRedactorEventTemplate = ({point, pointDestination, pointOffers, poin
         <label class="event__label  event__type-output" for="event-destination-1">
           ${capitalize(type)}
         </label>
-        <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${currentDestination ? he.encode(currentDestination.name) : ''}" list="destination-list-1">
-        ${createCitiesTemplate()}
+        <input
+          class="event__input  event__input--destination"
+          id="event-destination-1"
+          type="text"
+          name="event-destination"
+          value="${currentDestination ? he.encode(currentDestination.name) : ''}"
+          list="destination-list-1"
+          ${isDisabled ? 'disabled' : ''}>
+        ${createCitiesTemplate({isDisabled})}
       </div>
 
       <div class="event__field-group  event__field-group--time">
         <label class="visually-hidden" for="event-start-time-1">From</label>
-        <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${point.dateFrom ? humanizeDateTime(dateFrom) : ''}">
+        <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${point.dateFrom ? humanizeDateTime(dateFrom) : ''}" ${isDisabled ? 'disabled' : ''}>
         &mdash;
         <label class="visually-hidden" for="event-end-time-1">To</label>
-        <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${point.dateTo ? humanizeDateTime(dateTo) : ''}">
+        <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${point.dateTo ? humanizeDateTime(dateTo) : ''}" ${isDisabled ? 'disabled' : ''}>
       </div>
 
       <div class="event__field-group  event__field-group--price">
@@ -127,14 +137,25 @@ const createRedactorEventTemplate = ({point, pointDestination, pointOffers, poin
           <span class="visually-hidden">Price</span>
           &euro;
         </label>
-        <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${he.encode(basePrice.toString())}">
+        <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${he.encode(String(basePrice))}" ${isDisabled ? 'disabled' : ''}>
       </div>
 
-      ${createPointEditButtonsTemplate({pointType})}
+      ${createPointEditButtonsTemplate({pointType, isDisabled, isSaving, isDeleting})}
     </header>
     <section class="event__details">
-    ${createOffersSectionTemplate({ currentOffers, selectedOffers })}
-    ${createDestinationSectionTemplate({ currentDestination })}
+      ${(currentOffers.length !== 0) ?
+      `section class="event__section  event__section--offers">
+        <h3 class="event__section-title  event__section-title--offers">Offers</h3>
+        ${createOffersTemplate({currentOffers, selectedOffers})}
+      </section>` : ''}
+      ${(currentDestination) ?
+      `<section class="event__section  event__section--destination">
+         <h3 class="event__section-title  event__section-title--destination">Destination</h3>
+         <p class="event__destination-description">${currentDestination.description}</p>
+         <div class="event__photos-container">
+             ${createPhotosTemplate({currentDestination})}
+         </div>
+      </section>` : ''}
     </section>
   </form>
   </li>`);
@@ -289,9 +310,13 @@ export default class RedactorEventView extends AbstractStatefulView{
     );
   };
 
-  static parsePointToState({point}){
-    return {point};
-  }
+  static parsePointToState = ({point, isDisabled = false, isSaving = false, isDeleting = false}) =>
+    ({
+      point,
+      isDisabled,
+      isSaving,
+      isDeleting,
+    });
 
   static parseStateToPoint(state){
     return state.point;
@@ -309,4 +334,16 @@ export default class RedactorEventView extends AbstractStatefulView{
       this.#datepickerTo = null;
     }
   };
+
+  get isDisabled() {
+    return this._state.isDisabled;
+  }
+
+  get isSaving() {
+    return this._state.isDisabled;
+  }
+
+  get isDeleting() {
+    return this._state.isDeleting;
+  }
 }

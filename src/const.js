@@ -98,11 +98,19 @@ const FilterMessage = {
 const ButtonLabel = {
   CANCEL: 'Cancel',
   DELETE: 'Delete',
-  SAVE: 'Save'
+  SAVE: 'Save',
+  SAVING: 'Saving...',
+  DELETING: 'Deleting...',
 };
 const Method = {
   GET: 'GET',
   PUT: 'PUT',
+  POST: 'POST',
+  DELETE: 'DELETE',
+};
+const TimeLimit = {
+  LOWER_LIMIT: 350,
+  UPPER_LIMIT: 1000,
 };
 
 export {
@@ -127,4 +135,5 @@ export {
   FilterMessage,
   ButtonLabel,
   Method,
+  TimeLimit,
 };

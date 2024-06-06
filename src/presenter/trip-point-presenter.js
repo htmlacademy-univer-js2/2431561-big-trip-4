@@ -86,7 +86,7 @@ export default class TripPointPresenter{
   };
 
   #onEscape = (evt) => {
-    if(evt.key === 'Escape'){
+    if(evt.key === 'Escape' && this.#redactorComponent.isDisabled){
       evt.preventDefault();
       this.#pointComponent.reset(this.#point);
       this.#switchToPoint();
@@ -107,17 +107,53 @@ export default class TripPointPresenter{
   };
 
   #redactorSubmitHandler = (newPoint) => {
-    this.#handleDataChange(UserAction.UPDATE_POINT, UpdateType.MINOR, newPoint);
-    this.#switchToPoint();
+    this.#handleDataChange(UserAction.UPDATE_POINT, UpdateType.PATCH, newPoint);
+    if(!this.#redactorComponent.isDisabled){
+      this.#switchToPoint();
+    }
   };
 
   #redactorCloseHandler = () => {
-    this.#redactorComponent.reset(this.#point);
-    this.#switchToPoint();
+    if(!this.#redactorComponent.isDisabled){
+      this.#redactorComponent.reset(this.#point);
+      this.#switchToPoint();
+    }
   };
 
   #redactorDeleteHandler = (point) => {
     this.#handleDataChange(UserAction.DELETE_POINT, UpdateType.MINOR, point);
   };
 
+  setSaving = () => {
+    if(this.#mode === MODE.EDITING){
+      this.#redactorComponent.updateElement({
+        isDisabled: true,
+        isSaving: true,
+      });
+    }
+  };
+
+  setAborting = () => {
+    if(this.#mode === MODE.DEFAULT){
+      this.#pointComponent.shake();
+      return;
+    }
+    if(this.#mode === MODE.EDITING){
+      const resetFormState = () => {
+        this.#redactorComponent.updateElement({
+          isDisabled: false,
+          isSaving: false,
+          isDeleting: false,
+        });
+      };
+      this.#redactorComponent.shake(resetFormState);
+    }
+  };
+
+  setDeleting = () => {
+    this.#redactorComponent.updateElement({
+      isDisabled: true,
+      isSaving: true,
+    });
+  };
 }
