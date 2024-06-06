@@ -14,8 +14,15 @@ export default class PointService extends ApiService{
     return this._load({url: 'destinations'}).then(ApiService.parseResponse);
   }
 
-  addPoint(data){
-    return {...data, id: crypto.randomUUID()};
+  async addPoint(data){
+    const response = await this._load({
+      url: 'points',
+      method: Method.POST,
+      body: JSON.stringify(data),
+      headers: new Headers({'Content-Type': 'application/json'}),
+    });
+
+    return ApiService.parseResponse(response);
   }
 
   async updatePoint(newPoint){
@@ -30,7 +37,10 @@ export default class PointService extends ApiService{
     return await ApiService.parseResponse(response);
   }
 
-  deletePoint(){
-
+  async deletePoint(point){
+    await this._load({
+      url: `points/${point.id}`,
+      method: Method.DELETE,
+    });
   }
 }

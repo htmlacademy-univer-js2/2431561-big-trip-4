@@ -36,3 +36,4 @@ render(new DestinationView(), siteDestinationContainer, RenderPosition.AFTERBEGI
 newPointButton.init({onClick: tripPresenter.handleNewPointClick});
 tripPresenter.init();
 filterPresenter.init();
+pointsModel.init();

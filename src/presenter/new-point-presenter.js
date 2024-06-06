@@ -60,4 +60,22 @@ export default class NewPointPresenter{
     document.removeEventListener('keydown', this.#onEscape);
     this.#handleDestroy({isCanceled});
   };
+
+  setSaving = () => {
+    this.#component.updateElement({
+      isDisabled: true,
+      isSaving: true,
+    });
+  };
+
+  setAborting = () => {
+    const resetFormState = () => {
+      this.#component.updateElement({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+    this.#component.shake(resetFormState);
+  };
 }
