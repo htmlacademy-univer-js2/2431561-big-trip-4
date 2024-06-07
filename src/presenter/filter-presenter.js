@@ -47,10 +47,6 @@ export default class FilterPresenter {
   }
 
   #handleTypeChange = (type) =>{
-    if(type === this.#filterModel.get()){
-      return;
-    }
-
     this.#filterModel.set(UpdateType.MAJOR, type);
   };
 

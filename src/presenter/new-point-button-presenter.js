@@ -17,7 +17,10 @@ export default class NewPointButtonPresenter {
   }
 
   #buttonClickHandler = () => {
-    this.#handleButtonClick();
+    const disabledButton = document.querySelector('.event__reset-btn[disabled]');
+    if (!disabledButton) {
+      this.#handleButtonClick();
+    }
   };
 
   disableButton() {

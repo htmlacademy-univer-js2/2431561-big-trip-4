@@ -1,8 +1,11 @@
-export default class OffersModel{
+import Observable from '../framework/observable';
+
+export default class OffersModel extends Observable{
   #service = null;
   #offers = [];
 
   constructor(service){
+    super();
     this.#service = service;
   }
 
@@ -15,7 +18,7 @@ export default class OffersModel{
   }
 
   async init(){
-    this.#offers = await this.#service.offers;
+    this.#offers = await this.#service.getOffers();
     return this.#offers;
   }
 }

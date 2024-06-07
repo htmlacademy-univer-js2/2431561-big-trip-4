@@ -1,7 +1,6 @@
 import RedactorEventView from '../view/redactor-event-view';
 import { render, remove, RenderPosition } from '../framework/render';
 import { UserAction, UpdateType, EditType} from '../const';
-import {nanoid} from 'nanoid';
 
 export default class NewPointPresenter{
   #container = null;
@@ -22,8 +21,8 @@ export default class NewPointPresenter{
   init(){
     if (!this.#component) {
       this.#component = new RedactorEventView({
-        destinations: this.#destinationsModel.get(),
-        offers: this.#offersModel.get(),
+        pointDestination: this.#destinationsModel.get(),
+        pointOffers: this.#offersModel.get(),
         onFormClose: this.#handleFormClose,
         onFormSubmit: this.#handleFormSubmit,
         pointType: EditType.CREATING,
@@ -34,13 +33,12 @@ export default class NewPointPresenter{
     }
   }
 
-  #handleFormSubmit = (update) => {
-    this.#handleDataChange(UserAction.ADD_POINT, UpdateType.MINOR, {id: nanoid(), ...update},);
-    this.destroy({isCanceled:false});
-  };
-
   #handleFormClose = () => {
     this.destroy();
+  };
+
+  #handleFormSubmit = (update) => {
+    this.#handleDataChange(UserAction.ADD_POINT, UpdateType.MINOR, update);
   };
 
   #onEscape = (evt) => {
@@ -62,19 +60,12 @@ export default class NewPointPresenter{
   };
 
   setSaving = () => {
-    this.#component.updateElement({
-      isDisabled: true,
-      isSaving: true,
-    });
+    this.#component.updateElement({isDisabled: true, isSaving: true,});
   };
 
   setAborting = () => {
     const resetFormState = () => {
-      this.#component.updateElement({
-        isDisabled: false,
-        isSaving: false,
-        isDeleting: false,
-      });
+      this.#component.updateElement({ isDisabled: false, isSaving: false, isDeleting: false, });
     };
     this.#component.shake(resetFormState);
   };

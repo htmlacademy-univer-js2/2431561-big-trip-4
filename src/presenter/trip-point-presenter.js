@@ -14,25 +14,24 @@ export default class TripPointPresenter{
   #handleDataChange = null;
   #handleModeChange = null;
 
-  constructor({container, destinationsModel, offersModel, handleDataChange, handleModeChange}){
+  constructor({container, destinationsModel, offersModel, onDataChange, onModeChange}){
     this.#container = container;
     this.#destinationsModel = destinationsModel;
     this.#offersModel = offersModel;
-    this.#handleDataChange = handleDataChange;
-    this.#handleModeChange = handleModeChange;
+    this.#handleDataChange = onDataChange;
+    this.#handleModeChange = onModeChange;
   }
 
   init(point){
     this.#point = point;
     const prevPointComponent = this.#pointComponent;
     const prevRedactorComponent = this.#redactorComponent;
-
     this.#pointComponent = new TripPointView({
       point: this.#point,
       pointDestination: this.#destinationsModel.getById(point.destination),
       pointOffers: this.#offersModel.getByType(point.type),
       onRedactorClick: this.#pointRedactorClickHandler,
-      onFavoriteClick: this.#onFavoriteClick,
+      onFavoriteClick: this.#favoriteClickHandler,
     }
     );
     this.#redactorComponent = new RedactorEventView({
@@ -86,14 +85,14 @@ export default class TripPointPresenter{
   };
 
   #onEscape = (evt) => {
-    if(evt.key === 'Escape' && this.#redactorComponent.isDisabled){
+    if(evt.key === 'Escape' && !this.#redactorComponent.isDisabled){
       evt.preventDefault();
       this.#pointComponent.reset(this.#point);
       this.#switchToPoint();
     }
   };
 
-  #onFavoriteClick = () => {
+  #favoriteClickHandler = () => {
     this.#handleDataChange(
       UserAction.UPDATE_POINT,
       UpdateType.PATCH,{

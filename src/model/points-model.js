@@ -20,6 +20,25 @@ export default class PointsModel extends Observable{
     return this.#points;
   }
 
+  getById(id){
+    return this.#points.find((point) => point.id === id);
+  }
+
+  async init(){
+    try{
+      await Promise.all([
+        this.#offersModel.init(),
+        this.#destinationsModel.init()
+      ]);
+      const points = await this.#service.getPoints();
+      this.#points = points.map(adaptToClient);
+      this._notify(UpdateType.INIT, {isEror: false});
+    } catch (error){
+      this.#points = [];
+      this._notify(UpdateType.INIT, {isEror: true});
+    }
+  }
+
   async addPoint(updateType, update){
     try{
       const response = await this.#service.addPoint(adaptToServer(update));
@@ -49,21 +68,6 @@ export default class PointsModel extends Observable{
       this._notify(updateType);
     }catch{
       throw new Error('Can not delete point');
-    }
-  }
-
-  async init(){
-    try{
-      await Promise.all([
-        this.#offersModel.init(),
-        this.#destinationsModel.init(),
-      ]);
-      const points = await this.#service.points;
-      this.#points = points.map(adaptToClient);
-      this._notify(UpdateType.INIT, {});
-    } catch{
-      this.#points = [];
-      this._notify(UpdateType.INIT, {isEror: true});
     }
   }
 }
