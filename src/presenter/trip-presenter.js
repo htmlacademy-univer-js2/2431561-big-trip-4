@@ -101,7 +101,7 @@ export default class TripPresenter{
       return;
     }
 
-    if(this.points.length === 0 && !this.#isCreating){
+    if(!this.points.length && !this.#isCreating){
       this.#renderMessage();
       return;
     }
@@ -129,8 +129,8 @@ export default class TripPresenter{
       container: this.#pointList.element,
       destinationsModel: this.#destinationsModel,
       offersModel: this.#offersModel,
-      handleDataChange: this.#handlePointChange,
-      handleModeChange: this.#handleModeChange,
+      onDataChange: this.#handlePointChange,
+      onModeChange: this.#handleModeChange,
     });
     pointPresenter.init(point);
     this.#pointPresenters.set(point.id, pointPresenter);
@@ -182,6 +182,7 @@ export default class TripPresenter{
   };
 
   #handlePointChange = async (actionType, updateType, update) => {
+    this.#blocker.block();
     switch (actionType) {
       case UserAction.ADD_POINT:
         this.#newPointPresenter.setSaving();
@@ -226,9 +227,11 @@ export default class TripPresenter{
         break;
       case UpdateType.INIT:
         if(data.isError){
+          this.#isLoading = false;
           this.#isErrorLoading = true;
         }else{
           this.#isLoading = false;
+          this.#isErrorLoading = false;
           remove(this.#loadingComponent);
         }
         this.#renderTrip();

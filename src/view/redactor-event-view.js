@@ -1,21 +1,21 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view';
-import { POINT_EMPTY, TYPES_OF_TRIP, CITIES, EditType, ButtonLabel } from '../const';
+import { POINT_EMPTY, EditType, ButtonLabel } from '../const';
 import { capitalize, getLastWord } from '../utils/common';
 import { humanizeDateTime } from '../utils/point';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 import he from 'he';
 
-const createPointTypesTemplate = ({currentType, isDisabled}) => TYPES_OF_TRIP.reduce((accumulator, type)=>
-  `${accumulator}<div class="event__type-item">
-     <input id="event-type-${type}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" ${currentType === type ? 'checked' : ''} ${(isDisabled) ? 'disabled' : ''}>
-     <label class="event__type-label  event__type-label--${type}" for="event-type-${type}-1">${capitalize(type)}</label>
-   </div>`, ''
-);
+const createPointTypesTemplate = ({pointOffers, currentType, isDisabled}) =>
+  pointOffers.reduce((accumulator, offer)=>
+    `${accumulator}<div class="event__type-item">
+     <input id="event-type-${offer.type}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${offer.type}" ${currentType === offer.type ? 'checked' : ''} ${(isDisabled) ? 'disabled' : ''}>
+     <label class="event__type-label  event__type-label--${offer.type}" for="event-type-${offer.type}-1">${capitalize(offer.type)}</label>
+   </div>`, '');
 
-const createCitiesTemplate = ({isDisabled}) => (
+const createCitiesTemplate = ({pointDestination, isDisabled}) => (
   `<datalist id="destination-list-1" ${isDisabled ? 'disabled' : ''}>
-        ${CITIES.reduce((accumulator, city) => `${accumulator}<option value="${city}"></option>`, '')}
+        ${pointDestination.reduce((accumulator, city) => `${accumulator}<option value="${city.name}"></option>`, '')}
     </datalist>`
 );
 
@@ -30,41 +30,13 @@ const createOffersTemplate = ({currentOffers, selectedOffers}) => {
               </label>
           </div>`
   ), '');
-  return offerItems;
+  return `<div class="event__available-offers">${offerItems}</div>`;
 };
 
 const createPhotosTemplate = ({currentDestination}) => (
   `<div class="event__photos-tape">
-  ${(currentDestination.illustrations.length) ? currentDestination.illustrations.reduce((accumulator, picture) => (`${accumulator}<img class="event__photo" src="${picture.src}" alt="${picture.description}">`), '') : ''}
-  </div>`
-);
-
-// const createOffersSectionTemplate = ({ currentOffers, selectedOffers }) => `
-//   <section class="event__section  event__section--offers">
-//     <h3 class="event__section-title  event__section-title--offers">Offers</h3>
-//     <div class="event__available-offers">
-//       ${createOffersTemplate({ currentOffers, selectedOffers })}
-//     </div>
-//   </section>
-// `;
-
-// const createDestinationSectionTemplate = ({ currentDestination }) => {
-//   if (!currentDestination.illustrations.length && !currentDestination.description.length) {
-//     return '';
-//   }
-//   return `
-//     <section class="event__section  event__section--destination">
-//       <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-//       ${currentDestination.description.length
-//     ? `<p class="event__destination-description">
-//         ${currentDestination.description}
-//       </p>` : ''}
-//       ${currentDestination.illustrations.length
-//     ? `<div class="event__photos-container">
-//         ${createPhotosTemplate({ currentDestination })}
-//       </div>` : ''}
-//     </section>`;
-// };
+  ${(currentDestination.pictures.length) ? currentDestination.pictures.reduce((accumulator, picture) => (`${accumulator}<img class="event__photo" src="${picture.src}" alt="${picture.description}">`), '') : ''}
+  </div>`);
 
 const createPointEditButtonsTemplate = ({pointType, isDisabled, isSaving, isDeleting}) => {
   const isEditing = pointType === EditType.EDITING;
@@ -104,7 +76,7 @@ const createRedactorEventTemplate = ({state, pointDestination, pointOffers, poin
         <div class="event__type-list">
           <fieldset class="event__type-group">
             <legend class="visually-hidden">Event type</legend>
-            ${createPointTypesTemplate({type, isDisabled})}
+            ${createPointTypesTemplate({pointOffers, type, isDisabled})}
           </fieldset>
         </div>
       </div>
@@ -121,7 +93,7 @@ const createRedactorEventTemplate = ({state, pointDestination, pointOffers, poin
           value="${currentDestination ? he.encode(currentDestination.name) : ''}"
           list="destination-list-1"
           ${isDisabled ? 'disabled' : ''}>
-        ${createCitiesTemplate({isDisabled})}
+        ${createCitiesTemplate({pointDestination, isDisabled})}
       </div>
 
       <div class="event__field-group  event__field-group--time">
@@ -144,7 +116,7 @@ const createRedactorEventTemplate = ({state, pointDestination, pointOffers, poin
     </header>
     <section class="event__details">
       ${(currentOffers.length !== 0) ?
-      `section class="event__section  event__section--offers">
+      `<section class="event__section  event__section--offers">
         <h3 class="event__section-title  event__section-title--offers">Offers</h3>
         ${createOffersTemplate({currentOffers, selectedOffers})}
       </section>` : ''}
@@ -171,7 +143,7 @@ export default class RedactorEventView extends AbstractStatefulView{
   #datepickerTo = null;
   #pointType = null;
 
-  constructor({point = POINT_EMPTY, pointDestination, pointOffers, onFormClose, onFormSubmit, onFormDelete}){
+  constructor({point = POINT_EMPTY, pointDestination, pointOffers, onFormClose, onFormSubmit, onFormDelete, pointType}){
     super();
     this._setState(RedactorEventView.parsePointToState({point}));
     this.#pointDestination = pointDestination;
@@ -179,12 +151,13 @@ export default class RedactorEventView extends AbstractStatefulView{
     this.#handleRedactorClose = onFormClose;
     this.#handleRedactorSubmit = onFormSubmit;
     this.#handleRedactorDelete = onFormDelete;
+    this.#pointType = pointType;
     this._restoreHandlers();
 
   }
 
   get template(){
-    return createRedactorEventTemplate({point: this._state.point, pointDestination: this.#pointDestination, pointOffers: this.#pointOffers, pointType: this.#pointType });
+    return createRedactorEventTemplate({state: this._state, pointDestination: this.#pointDestination, pointOffers: this.#pointOffers, pointType: this.#pointType });
   }
 
   reset = (point) => {
@@ -200,9 +173,10 @@ export default class RedactorEventView extends AbstractStatefulView{
       this.element.querySelector('.event__reset-btn').addEventListener('click', this.#redactorCloseHandler);
     }
     this.element.querySelector('form').addEventListener('submit', this.#redactorSubmitHandler);
-    this.element.querySelector('.event__available-offers').addEventListener('change', this.#offerChangeHandler);
+    this.element.querySelector('.event__available-offers')?.addEventListener('change', this.#offerChangeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationChangeHandler);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#typeChangeHandler);
+    this.element.querySelector('.event__input--price').addEventListener('change', this.#priceChangeHandler);
 
     this.#setDatePickers();
   };
@@ -244,7 +218,7 @@ export default class RedactorEventView extends AbstractStatefulView{
   };
 
   #destinationChangeHandler = (evt) => {
-    const selectedDestination = this.#pointDestination.find((destination) => destination.name === evt.target.value).id;
+    const selectedDestination = this.#pointDestination.find((destination) => destination.name === evt.target.value);
     if(!selectedDestination){
       return;
     }
@@ -252,6 +226,15 @@ export default class RedactorEventView extends AbstractStatefulView{
       point: {
         ...this._state.point,
         destination: selectedDestination.id,
+      }
+    });
+  };
+
+  #priceChangeHandler = (evt) => {
+    this._setState({
+      point: {
+        ...this._state.point,
+        basePrice: evt.target.value
       }
     });
   };
