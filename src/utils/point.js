@@ -2,12 +2,9 @@ import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { TIME_PERIODS } from '../const';
-import {getRandomNumber} from './common';
 
 dayjs.extend(duration);
 dayjs.extend(relativeTime);
-
-let date = dayjs().subtract(getRandomNumber(0, 5), 'day').toDate();
 
 function humanizeDateTime(dateInfo) {
   return dateInfo ? dayjs(dateInfo).format('YYYY-MM-DDTHH:mm') : '';
@@ -36,22 +33,6 @@ function getPointDuration(dateFrom, dateTo){
       break;
   }
   return pointDuration;
-}
-
-function getScheduleDate(dateInfo){
-  return dayjs(dateInfo).format('DD/MM/YY HH:mm');
-}
-
-function getDate({next}){
-  const minGap = getRandomNumber(0, 59);
-  const hourGap = getRandomNumber(1, 5);
-  const dayGap = getRandomNumber(0, 5);
-
-  if(next){
-    date = dayjs(date).add(minGap, 'minute').add(hourGap, 'hour').add(dayGap, 'day').toDate();
-  }
-
-  return date;
 }
 
 function isPointFuture(point) {
@@ -103,5 +84,5 @@ function adaptToServer(point){
   return adaptedPoint;
 }
 
-export {humanizeDateTime, humanizeShortDate, humanizeTime, getPointDuration, getScheduleDate, getDate,
+export {humanizeDateTime, humanizeShortDate, humanizeTime, getPointDuration,
   isPointFuture, isPointPresent, isPointPast, getDuration, adaptToClient, adaptToServer};
